@@ -1,0 +1,50 @@
+<!-- templates/registration/voting.html -->
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Log in</button>
+</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Polling App - Vote</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            // AJAX request to handle voting
+            $('#vote-form').on('submit', function(event){
+                event.preventDefault(); // Prevent default form submission
+                var form = $(this);
+                $.ajax({
+                    type: 'POST',
+                    url: form.attr('action'),
+                    data: form.serialize(), // Serialize form data
+                    success: function(response){
+                        // Update the results section with new data
+                        $('#results').html(response);
+                    },
+                    error: function(xhr, status, error){
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Vote</h1>
+    <form id="vote-form" action="{% url 'vote' %}" method="post">
+        {% csrf_token %}
+        {% for choice in poll.choices.all %}
+            <input type="radio" id="choice{{ forloop.counter }}" name="choice" value="{{ choice.id }}">
+            <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+        {% endfor %}
+        <button type="submit">Vote</button>
+    </form>
+    <div id="results">
+        <!-- Results will be displayed here after voting -->
+    </div>
+</body>
+</html>
